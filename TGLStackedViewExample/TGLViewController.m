@@ -146,6 +146,14 @@
         
         [self.collectionView addGestureRecognizer:recognizer];
     }
+    
+    self.willExposedItemHandler = ^(NSIndexPath * _Nullable oldVal, NSIndexPath * _Nullable newVal) {
+        NSLog(@"--- willExposedItemHandler");
+    };
+    self.didExposedItemHandler = ^(NSIndexPath * _Nullable oldVal, NSIndexPath * _Nullable newVal) {
+        NSLog(@"--- didExposedItemHandler");
+    };
+    
 }
 
 - (void)viewDidAppear:(BOOL)animated {

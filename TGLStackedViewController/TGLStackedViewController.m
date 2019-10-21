@@ -214,9 +214,10 @@
             self.stackedLayout.overwriteContentOffset = YES;
             self.exposedLayout = exposedLayout;
 
-            if (self.exposedItemIndexPathHandler != NULL) {
-                self.exposedItemIndexPathHandler(self->_exposedItemIndexPath, exposedItemIndexPath);
+            if (self.didExposedItemHandler != NULL) {
+                self.didExposedItemHandler(self->_exposedItemIndexPath, exposedItemIndexPath);
             }
+             
             // Mention self explicitly here to get rid of compiler warning
             self->_exposedItemIndexPath = exposedItemIndexPath;
 
@@ -230,6 +231,10 @@
         };
         
         [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
+        
+        if (self.willExposedItemHandler != NULL) {
+            self.willExposedItemHandler(self->_exposedItemIndexPath, exposedItemIndexPath);
+        }
 
         if (animated) {
             
@@ -269,9 +274,10 @@
             //       `layoutcompletion` goes out of scope.
             self.exposedLayout = exposedLayout;
 
-            if (self.exposedItemIndexPathHandler != NULL) {
-                self.exposedItemIndexPathHandler(self->_exposedItemIndexPath, exposedItemIndexPath);
+            if (self.didExposedItemHandler != NULL) {
+                self.didExposedItemHandler(self->_exposedItemIndexPath, exposedItemIndexPath);
             }
+            
             // Mention self explicitly here to get rid of compiler warning
             self->_exposedItemIndexPath = exposedItemIndexPath;
             
@@ -285,6 +291,10 @@
         };
         
         [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
+        
+        if (self.willExposedItemHandler != NULL) {
+            self.willExposedItemHandler(self->_exposedItemIndexPath, exposedItemIndexPath);
+        }
 
         if (animated) {
             
@@ -304,6 +314,7 @@
         // 1. -exposedItemIndexPath has been set to nil or
         // 2. we're not allowed to collapse by selecting a new item
         //
+        
         [self.collectionView deselectItemAtIndexPath:self.exposedItemIndexPath animated:YES];
         
         UICollectionViewCell *exposedCell = [self.collectionView cellForItemAtIndexPath:self.exposedItemIndexPath];
@@ -312,16 +323,18 @@
         
         self.exposedLayout = nil;
         
-        if (self.exposedItemIndexPathHandler != NULL) {
-            self.exposedItemIndexPathHandler(_exposedItemIndexPath, exposedItemIndexPath);
-        }
-        _exposedItemIndexPath = nil;
-        
         void (^layoutcompletion) (BOOL) = ^ (BOOL finished) {
             
             // NOTE: We can use strong self references here since
             //       the cycle is broken as soon as local variable
             //       `layoutcompletion` goes out of scope.
+            
+            if (self.didExposedItemHandler != NULL) {
+                self.didExposedItemHandler(self->_exposedItemIndexPath, exposedItemIndexPath);
+            }
+            
+            self->_exposedItemIndexPath = nil;
+            
             self.stackedLayout.overwriteContentOffset = NO;
             
             [[UIApplication sharedApplication] endIgnoringInteractionEvents];
@@ -330,6 +343,10 @@
         };
         
         [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
+        
+        if (self.willExposedItemHandler != NULL) {
+            self.willExposedItemHandler(self->_exposedItemIndexPath, exposedItemIndexPath);
+        }
 
         if (animated) {
             
@@ -351,10 +368,14 @@
     // Set -exposedItemIndexPath to `nil` w/o triggering
     // any layout updates as in the setters above
     
-    if (self.exposedItemIndexPathHandler != NULL) {
-        self.exposedItemIndexPathHandler(self.exposedItemIndexPath, nil);
+    if (self.willExposedItemHandler != NULL) {
+        self.willExposedItemHandler(self.exposedItemIndexPath, nil);
     }
      _exposedItemIndexPath = nil;
+    
+    if (self.didExposedItemHandler != NULL) {
+        self.didExposedItemHandler(self.exposedItemIndexPath, nil);
+    }
     
 }
 
